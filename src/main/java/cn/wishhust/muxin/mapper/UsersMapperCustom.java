@@ -7,6 +7,7 @@ import cn.wishhust.muxin.utils.MyMapper;
 
 import java.util.List;
 
+// 自定义sql
 public interface UsersMapperCustom extends MyMapper<Users> {
 
 	public List<FriendRequestVO> queryFriendRequestList(String acceptUserId);

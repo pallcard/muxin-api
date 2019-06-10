@@ -1,6 +1,7 @@
 package cn.wishhust.muxin.controller;
 
 import cn.wishhust.muxin.enums.SearchFriendsStatusEnum;
+import cn.wishhust.muxin.enums.OperatorFriendRequestTypeEnum;
 import cn.wishhust.muxin.pojo.Users;
 import cn.wishhust.muxin.pojo.bo.UsersBO;
 import cn.wishhust.muxin.pojo.vo.UsersVO;
@@ -127,6 +128,38 @@ public class UserController {
         } else {
             String errorMsg = SearchFriendsStatusEnum.getMsgByKey(status);
             return IJSONResult.errorMsg(errorMsg);
+        }
+        return IJSONResult.ok();
+    }
+
+    @PostMapping("/queryFriendRequests")
+    public IJSONResult queryFriendRequests(String userId) {
+        // 判空
+        if (StringUtils.isBlank(userId)) {
+            return IJSONResult.errorMsg("");
+        }
+        // 查询朋友申请
+        return IJSONResult.ok(userService.queryFriendRequestList(userId));
+    }
+
+    @PostMapping("/operFriendRequest")
+    public IJSONResult operFriendRequest(String acceptUserId, String sendUserId, Integer operType) {
+        // 判空
+        if (StringUtils.isBlank(acceptUserId)
+                || StringUtils.isBlank(sendUserId)
+                || null == operType) {
+            return IJSONResult.errorMsg("");
+        }
+        // operType无对应枚举值
+        if (StringUtils.isBlank(OperatorFriendRequestTypeEnum.getMsgByType(operType))) {
+            return IJSONResult.errorMsg("");
+        }
+
+        if (operType == OperatorFriendRequestTypeEnum.IGNORE.type) {
+            // 忽略好友请求则删除数据库记录
+            userService.deleteFriendRequest(sendUserId,acceptUserId);
+        } else if(operType == OperatorFriendRequestTypeEnum.PASS.type) {
+            userService.passFriendRequest(sendUserId, acceptUserId);
         }
         return IJSONResult.ok();
     }

@@ -1,6 +1,9 @@
 package cn.wishhust.muxin.service;
 
 import cn.wishhust.muxin.pojo.Users;
+import cn.wishhust.muxin.pojo.vo.FriendRequestVO;
+
+import java.util.List;
 
 public interface UserService {
     // 判断用户名是否存在
@@ -23,4 +26,14 @@ public interface UserService {
 
     // 添加好友请求记录，保存到数据库
     public void sendFriendRequest(String myUserId, String friendUsername);
+
+    // 查询好友请求
+    public List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
+
+    //删除好友请求
+    public void deleteFriendRequest(String sendUserId, String acceptUserId);
+
+    //通过好友请求
+    public void passFriendRequest(String sendUserId, String acceptUserId);
+
 }

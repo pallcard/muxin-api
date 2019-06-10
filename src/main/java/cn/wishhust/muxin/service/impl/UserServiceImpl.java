@@ -4,9 +4,11 @@ import cn.wishhust.muxin.enums.SearchFriendsStatusEnum;
 import cn.wishhust.muxin.mapper.FriendsRequestMapper;
 import cn.wishhust.muxin.mapper.MyFriendsMapper;
 import cn.wishhust.muxin.mapper.UsersMapper;
+import cn.wishhust.muxin.mapper.UsersMapperCustom;
 import cn.wishhust.muxin.pojo.FriendsRequest;
 import cn.wishhust.muxin.pojo.MyFriends;
 import cn.wishhust.muxin.pojo.Users;
+import cn.wishhust.muxin.pojo.vo.FriendRequestVO;
 import cn.wishhust.muxin.service.UserService;
 import cn.wishhust.muxin.utils.FastDFSClient;
 import cn.wishhust.muxin.utils.FileUtils;
@@ -34,6 +36,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private FriendsRequestMapper friendsRequestMapper;
+
+    @Autowired
+    private UsersMapperCustom usersMapperCustom;
 
     @Autowired
     private Sid sid;
@@ -138,6 +143,7 @@ public class UserServiceImpl implements UserService {
         return usersMapper.selectOneByExample(ue);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void sendFriendRequest(String myUserId, String friendUsername) {
 
@@ -158,6 +164,39 @@ public class UserServiceImpl implements UserService {
             friendsRequestMapper.insert(request);
         }
 
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<FriendRequestVO> queryFriendRequestList(String acceptUserId) {
+        return usersMapperCustom.queryFriendRequestList(acceptUserId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void deleteFriendRequest(String sendUserId, String acceptUserId) {
+        Example fre = new Example(FriendsRequest.class);
+        Example.Criteria frc = fre.createCriteria();
+        frc.andEqualTo("sendUserId", sendUserId);
+        frc.andEqualTo("acceptUserId", acceptUserId);
+        friendsRequestMapper.deleteByExample(fre);
+    }
+
+    @Override
+    public void passFriendRequest(String sendUserId, String acceptUserId) {
+        saveFriends(sendUserId, acceptUserId);
+        saveFriends(acceptUserId, sendUserId);
+        deleteFriendRequest(sendUserId, acceptUserId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    void saveFriends(String sendUserId, String acceptUserId) {
+        MyFriends myFriends = new MyFriends();
+        String recordId = sid.nextShort();
+        myFriends.setId(recordId);
+        myFriends.setMyUserId(sendUserId);
+        myFriends.setMyFriendUserId(acceptUserId);
+        myFriendsMapper.insert(myFriends);
     }
 
 }
