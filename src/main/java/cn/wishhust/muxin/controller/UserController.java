@@ -58,9 +58,9 @@ public class UserController {
     }
 
     @PostMapping("/uploadFaceBase64")
-    public IJSONResult uploadFaceBase64(@RequestBody UsersBO userBo) throws Exception {
-        String base64Data = userBo.getFaceData();
-        String userFacePath = "C:\\" + userBo.getUserId() + "userface64.png";
+    public IJSONResult uploadFaceBase64(@RequestBody UsersBO userBO) throws Exception {
+        String base64Data = userBO.getFaceData();
+        String userFacePath = "C:\\" + userBO.getUserId() + "userface64.png";
         FileUtils.base64ToFile(userFacePath,base64Data);
 
         // 上传文件到fastdfs
@@ -75,14 +75,27 @@ public class UserController {
 
         //更新用户头像
         Users user = new Users();
-        user.setId(userBo.getUserId());
+        user.setId(userBO.getUserId());
         user.setFaceImage(thumpImgUrl);
         user.setFaceImageBig(url);
 
-        userService.updateUserInfo(user);
+        Users result = userService.updateUserInfo(user);
 
-        return IJSONResult.ok(user);
+        return IJSONResult.ok(result);
     }
 
+    @PostMapping("/setNickname")
+    public IJSONResult setNickname(@RequestBody UsersBO userBO) {
+
+        // todo 对Nickname的判空
+        Users user = new Users();
+        user.setId(userBO.getUserId());
+        user.setNickname(userBO.getNickname());
+
+        Users result = userService.updateUserInfo(user);
+
+        return IJSONResult.ok(result);
+
+    }
 
 }
