@@ -1,5 +1,6 @@
 package cn.wishhust.muxin.controller;
 
+import cn.wishhust.muxin.enums.SearchFriendsStatusEnum;
 import cn.wishhust.muxin.pojo.Users;
 import cn.wishhust.muxin.pojo.bo.UsersBO;
 import cn.wishhust.muxin.pojo.vo.UsersVO;
@@ -35,9 +36,6 @@ public class UserController {
         boolean usernameIsExist = userService.queryUsernameIsExist(user.getUsername());
         Users userResult = null;
         if (usernameIsExist) {
-            System.out.println(user.getUsername());
-            System.out.println(user.getPassword());
-            System.out.println(MD5Utils.getMD5Str(user.getPassword()));
             // 登录
             userResult = userService.queryUserForLogin(user.getUsername(),
                     MD5Utils.getMD5Str(user.getPassword()));
@@ -96,6 +94,41 @@ public class UserController {
 
         return IJSONResult.ok(result);
 
+    }
+
+    @PostMapping("/search")
+    public IJSONResult searchUser(String myUserId, String friendUsername) {
+
+        if (StringUtils.isBlank(myUserId)
+                || StringUtils.isBlank(friendUsername)) {
+            return IJSONResult.errorMsg("");
+        }
+        Integer status = userService.preconditionSearchFriends(myUserId, friendUsername);
+        if (status == SearchFriendsStatusEnum.SUCCESS.status) {
+            Users user = userService.queryUserInfoByUsername(friendUsername);
+            UsersVO usersVO = new UsersVO();
+            BeanUtils.copyProperties(user, usersVO);
+            return IJSONResult.ok(usersVO);
+        } else {
+            String errorMsg = SearchFriendsStatusEnum.getMsgByKey(status);
+            return IJSONResult.errorMsg(errorMsg);
+        }
+    }
+
+    @PostMapping("/addFriendRequest")
+    public IJSONResult addFriendRequest(String myUserId, String friendUsername) {
+        if (StringUtils.isBlank(myUserId)
+                || StringUtils.isBlank(friendUsername)) {
+            return IJSONResult.errorMsg("");
+        }
+        Integer status = userService.preconditionSearchFriends(myUserId, friendUsername);
+        if (status == SearchFriendsStatusEnum.SUCCESS.status) {
+           userService.sendFriendRequest(myUserId, friendUsername);
+        } else {
+            String errorMsg = SearchFriendsStatusEnum.getMsgByKey(status);
+            return IJSONResult.errorMsg(errorMsg);
+        }
+        return IJSONResult.ok();
     }
 
 }
