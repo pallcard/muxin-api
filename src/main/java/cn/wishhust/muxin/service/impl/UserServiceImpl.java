@@ -10,8 +10,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
+
 
     @Autowired
     private UsersMapper usersMapper;
@@ -37,11 +40,12 @@ public class UserServiceImpl implements UserService {
         Example.Criteria criteria = userExample.createCriteria();
         criteria.andEqualTo("username", username);
         criteria.andEqualTo("password", pwd);
-        usersMapper.selectByExample(userExample);
+        Users result = usersMapper.selectOneByExample(userExample);
 
-        return null;
+        return result;
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public Users saveUser(Users user) {
         String userId = sid.nextShort();
@@ -51,5 +55,17 @@ public class UserServiceImpl implements UserService {
         usersMapper.insert(user);
 
         return user;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public Users updateUserInfo(Users user) {
+        usersMapper.updateByPrimaryKeySelective(user);
+        return queryUserById(user.getId());
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public Users queryUserById(String userId) {
+        return usersMapper.selectByPrimaryKey(userId);
     }
 }

@@ -1,14 +1,18 @@
 package cn.wishhust.muxin.controller;
 
 import cn.wishhust.muxin.pojo.Users;
+import cn.wishhust.muxin.pojo.bo.UsersBO;
 import cn.wishhust.muxin.pojo.vo.UsersVO;
 import cn.wishhust.muxin.service.UserService;
+import cn.wishhust.muxin.utils.FastDFSClient;
+import cn.wishhust.muxin.utils.FileUtils;
 import cn.wishhust.muxin.utils.IJSONResult;
 import cn.wishhust.muxin.utils.MD5Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/u")
@@ -16,6 +20,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FastDFSClient fastDFSClient;
 
     @PostMapping("/registOrLogin")
     public IJSONResult registOrLogin(@RequestBody Users user) throws Exception {
@@ -27,7 +34,10 @@ public class UserController {
 
         boolean usernameIsExist = userService.queryUsernameIsExist(user.getUsername());
         Users userResult = null;
-        if (usernameIsExist){
+        if (usernameIsExist) {
+            System.out.println(user.getUsername());
+            System.out.println(user.getPassword());
+            System.out.println(MD5Utils.getMD5Str(user.getPassword()));
             // 登录
             userResult = userService.queryUserForLogin(user.getUsername(),
                     MD5Utils.getMD5Str(user.getPassword()));
@@ -46,4 +56,33 @@ public class UserController {
         BeanUtils.copyProperties(userResult, usersVO);
         return IJSONResult.ok(usersVO);
     }
+
+    @PostMapping("/uploadFaceBase64")
+    public IJSONResult uploadFaceBase64(@RequestBody UsersBO userBo) throws Exception {
+        String base64Data = userBo.getFaceData();
+        String userFacePath = "C:\\" + userBo.getUserId() + "userface64.png";
+        FileUtils.base64ToFile(userFacePath,base64Data);
+
+        // 上传文件到fastdfs
+        MultipartFile faceFile = FileUtils.fileToMultipart(userFacePath);
+        String url = fastDFSClient.uploadBase64(faceFile);
+        System.out.println(url);
+
+        // 获取缩略图url
+        String thump = "_80x80.";
+        String [] arr = url.split("\\.");
+        String thumpImgUrl = arr[0] + thump + arr[1];
+
+        //更新用户头像
+        Users user = new Users();
+        user.setId(userBo.getUserId());
+        user.setFaceImage(thumpImgUrl);
+        user.setFaceImageBig(url);
+
+        userService.updateUserInfo(user);
+
+        return IJSONResult.ok(user);
+    }
+
+
 }
