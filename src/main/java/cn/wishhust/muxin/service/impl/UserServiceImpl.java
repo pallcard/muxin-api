@@ -1,10 +1,9 @@
 package cn.wishhust.muxin.service.impl;
 
 import cn.wishhust.muxin.enums.SearchFriendsStatusEnum;
-import cn.wishhust.muxin.mapper.FriendsRequestMapper;
-import cn.wishhust.muxin.mapper.MyFriendsMapper;
-import cn.wishhust.muxin.mapper.UsersMapper;
-import cn.wishhust.muxin.mapper.UsersMapperCustom;
+import cn.wishhust.muxin.enums.MsgSignFlagEnum;
+import cn.wishhust.muxin.mapper.*;
+import cn.wishhust.muxin.netty.ChatMsg;
 import cn.wishhust.muxin.pojo.FriendsRequest;
 import cn.wishhust.muxin.pojo.MyFriends;
 import cn.wishhust.muxin.pojo.Users;
@@ -40,6 +39,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UsersMapperCustom usersMapperCustom;
+
+    @Autowired
+    private ChatMsgMapper chatMsgMapper;
 
     @Autowired
     private Sid sid;
@@ -206,6 +208,29 @@ public class UserServiceImpl implements UserService {
     public List<MyFriendsVO> queryMyFriends(String userId) {
         List<MyFriendsVO> myFriends = usersMapperCustom.queryMyFriends(userId);
         return myFriends;
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public String saveMsg(ChatMsg chatMsg) {
+
+        cn.wishhust.muxin.pojo.ChatMsg msgDB = new cn.wishhust.muxin.pojo.ChatMsg();
+        String msgId = sid.nextShort();
+        msgDB.setId(msgId);
+        msgDB.setAcceptUserId(chatMsg.getReceiverId());
+        msgDB.setSendUserId(chatMsg.getSenderId());
+        msgDB.setCreateTime(new Date());
+        msgDB.setSignFlag(MsgSignFlagEnum.unsign.type);
+        msgDB.setMsg(chatMsg.getMsg());
+        chatMsgMapper.insert(msgDB);
+        return msgId;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void updateMsgSigned(List<String> msgIdList) {
+       usersMapperCustom.batchUpdateMsgSigned(msgIdList);
     }
 
 }

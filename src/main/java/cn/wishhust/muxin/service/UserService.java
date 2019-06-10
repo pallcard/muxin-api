@@ -1,5 +1,7 @@
 package cn.wishhust.muxin.service;
 
+
+import cn.wishhust.muxin.netty.ChatMsg;
 import cn.wishhust.muxin.pojo.Users;
 import cn.wishhust.muxin.pojo.vo.FriendRequestVO;
 import cn.wishhust.muxin.pojo.vo.MyFriendsVO;
@@ -39,4 +41,10 @@ public interface UserService {
 
     // 查询好友列表
     public List<MyFriendsVO> queryMyFriends(String userId);
+
+    // 保存聊天消息到数据库
+    public String saveMsg(ChatMsg chatMsg);
+
+    // 批量签收
+    public void updateMsgSigned(List<String> msgIdList);
 }
