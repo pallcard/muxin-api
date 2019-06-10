@@ -60,7 +60,7 @@ public class UserController {
     @PostMapping("/uploadFaceBase64")
     public IJSONResult uploadFaceBase64(@RequestBody UsersBO userBO) throws Exception {
         String base64Data = userBO.getFaceData();
-        String userFacePath = "C:\\" + userBO.getUserId() + "userface64.png";
+        String userFacePath = "F:\\" + userBO.getUserId() + "userface64.png";
         FileUtils.base64ToFile(userFacePath,base64Data);
 
         // 上传文件到fastdfs

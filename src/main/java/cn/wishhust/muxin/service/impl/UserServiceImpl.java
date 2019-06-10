@@ -3,13 +3,18 @@ package cn.wishhust.muxin.service.impl;
 import cn.wishhust.muxin.mapper.UsersMapper;
 import cn.wishhust.muxin.pojo.Users;
 import cn.wishhust.muxin.service.UserService;
+import cn.wishhust.muxin.utils.FastDFSClient;
+import cn.wishhust.muxin.utils.FileUtils;
+import cn.wishhust.muxin.utils.QRCodeUtils;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -21,6 +26,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private Sid sid;
+
+    @Autowired
+    private QRCodeUtils qrCodeUtils;
+
+    @Autowired
+    private FastDFSClient fastDFSClient;
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
@@ -49,8 +60,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public Users saveUser(Users user) {
         String userId = sid.nextShort();
-        // TODO 为每一个用户生成一个唯一的二维码
-        user.setQrcode("");
+        // 为每一个用户生成一个唯一的二维码
+        // muxin_qrcode:[username]
+        String qrCodePath = "F://user"+userId+"qrcode.png";
+        qrCodeUtils.createQRCode(qrCodePath,"muxin_qrcode:"+user.getUsername());
+        MultipartFile qrCodeFile = FileUtils.fileToMultipart(qrCodePath);
+        String qrCodeUrl = "";
+        try {
+            qrCodeUrl = fastDFSClient.uploadQRCode(qrCodeFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        user.setQrcode(qrCodeUrl);
         user.setId(userId);
         usersMapper.insert(user);
 
