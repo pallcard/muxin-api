@@ -2,6 +2,7 @@ package cn.wishhust.muxin.service;
 
 import cn.wishhust.muxin.pojo.Users;
 import cn.wishhust.muxin.pojo.vo.FriendRequestVO;
+import cn.wishhust.muxin.pojo.vo.MyFriendsVO;
 
 import java.util.List;
 
@@ -30,10 +31,12 @@ public interface UserService {
     // 查询好友请求
     public List<FriendRequestVO> queryFriendRequestList(String acceptUserId);
 
-    //删除好友请求
+    // 删除好友请求
     public void deleteFriendRequest(String sendUserId, String acceptUserId);
 
-    //通过好友请求
+    // 通过好友请求
     public void passFriendRequest(String sendUserId, String acceptUserId);
 
+    // 查询好友列表
+    public List<MyFriendsVO> queryMyFriends(String userId);
 }

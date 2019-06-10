@@ -4,6 +4,7 @@ import cn.wishhust.muxin.enums.SearchFriendsStatusEnum;
 import cn.wishhust.muxin.enums.OperatorFriendRequestTypeEnum;
 import cn.wishhust.muxin.pojo.Users;
 import cn.wishhust.muxin.pojo.bo.UsersBO;
+import cn.wishhust.muxin.pojo.vo.MyFriendsVO;
 import cn.wishhust.muxin.pojo.vo.UsersVO;
 import cn.wishhust.muxin.service.UserService;
 import cn.wishhust.muxin.utils.FastDFSClient;
@@ -15,6 +16,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/u")
@@ -161,7 +164,21 @@ public class UserController {
         } else if(operType == OperatorFriendRequestTypeEnum.PASS.type) {
             userService.passFriendRequest(sendUserId, acceptUserId);
         }
-        return IJSONResult.ok();
+
+        List<MyFriendsVO> myFriends = userService.queryMyFriends(acceptUserId);
+
+        return IJSONResult.ok(myFriends);
+    }
+
+    @PostMapping("/myFriends")
+    public IJSONResult myFriends(String userId) {
+        // 判空
+        if (StringUtils.isBlank(userId)) {
+            return IJSONResult.errorMsg("");
+        }
+        List<MyFriendsVO> myFriends = userService.queryMyFriends(userId);
+
+        return IJSONResult.ok(myFriends);
     }
 
 }

@@ -9,6 +9,7 @@ import cn.wishhust.muxin.pojo.FriendsRequest;
 import cn.wishhust.muxin.pojo.MyFriends;
 import cn.wishhust.muxin.pojo.Users;
 import cn.wishhust.muxin.pojo.vo.FriendRequestVO;
+import cn.wishhust.muxin.pojo.vo.MyFriendsVO;
 import cn.wishhust.muxin.service.UserService;
 import cn.wishhust.muxin.utils.FastDFSClient;
 import cn.wishhust.muxin.utils.FileUtils;
@@ -182,6 +183,7 @@ public class UserServiceImpl implements UserService {
         friendsRequestMapper.deleteByExample(fre);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void passFriendRequest(String sendUserId, String acceptUserId) {
         saveFriends(sendUserId, acceptUserId);
@@ -197,6 +199,13 @@ public class UserServiceImpl implements UserService {
         myFriends.setMyUserId(sendUserId);
         myFriends.setMyFriendUserId(acceptUserId);
         myFriendsMapper.insert(myFriends);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    @Override
+    public List<MyFriendsVO> queryMyFriends(String userId) {
+        List<MyFriendsVO> myFriends = usersMapperCustom.queryMyFriends(userId);
+        return myFriends;
     }
 
 }
