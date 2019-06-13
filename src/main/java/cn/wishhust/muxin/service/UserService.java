@@ -47,4 +47,7 @@ public interface UserService {
 
     // 批量签收
     public void updateMsgSigned(List<String> msgIdList);
+
+    // 获取未签收消息
+    List<cn.wishhust.muxin.pojo.ChatMsg> getUnReadMsgList(String acceptUserId);
 }

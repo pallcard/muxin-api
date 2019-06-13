@@ -246,4 +246,14 @@ public class UserServiceImpl implements UserService {
        usersMapperCustom.batchUpdateMsgSigned(msgIdList);
     }
 
+    @Override
+    public List<cn.wishhust.muxin.pojo.ChatMsg> getUnReadMsgList(String acceptUserId) {
+        Example chatExample = new Example(cn.wishhust.muxin.pojo.ChatMsg.class);
+        final Example.Criteria chatCriteria = chatExample.createCriteria();
+        chatCriteria.andEqualTo("signFlag", 0);
+        chatCriteria.andEqualTo("acceptUserId",acceptUserId);
+        List<cn.wishhust.muxin.pojo.ChatMsg> result = chatMsgMapper.selectByExample(chatExample);
+        return result;
+    }
+
 }

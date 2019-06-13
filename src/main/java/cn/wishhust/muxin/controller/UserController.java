@@ -192,4 +192,16 @@ public class UserController {
         return IJSONResult.ok(myFriends);
     }
 
+    @PostMapping("/getUnReadMsgList")
+    @ApiOperation("获取服务器的未签收消息")
+    public IJSONResult getUnReadMsgList(String acceptUserId){
+        // 判空
+        if (StringUtils.isBlank(acceptUserId)) {
+            return IJSONResult.errorMsg("");
+        }
+
+        List<cn.wishhust.muxin.pojo.ChatMsg> unReadMsgList = userService.getUnReadMsgList(acceptUserId);
+        return IJSONResult.ok(unReadMsgList);
+    }
+
 }
