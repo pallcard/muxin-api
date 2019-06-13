@@ -11,6 +11,8 @@ import cn.wishhust.muxin.utils.FastDFSClient;
 import cn.wishhust.muxin.utils.FileUtils;
 import cn.wishhust.muxin.utils.IJSONResult;
 import cn.wishhust.muxin.utils.MD5Utils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/u")
+@Api(value = "用户接口管理")
 public class UserController {
 
     @Autowired
@@ -30,6 +33,7 @@ public class UserController {
     private FastDFSClient fastDFSClient;
 
     @PostMapping("/registOrLogin")
+    @ApiOperation(value = "注册或登陆")
     public IJSONResult registOrLogin(@RequestBody Users user) throws Exception {
 
         if(StringUtils.isBlank(user.getUsername())
@@ -60,6 +64,7 @@ public class UserController {
     }
 
     @PostMapping("/uploadFaceBase64")
+    @ApiOperation("上传头像")
     public IJSONResult uploadFaceBase64(@RequestBody UsersBO userBO) throws Exception {
         String base64Data = userBO.getFaceData();
         String userFacePath = "F:\\" + userBO.getUserId() + "userface64.png";
@@ -87,6 +92,7 @@ public class UserController {
     }
 
     @PostMapping("/setNickname")
+    @ApiOperation("设置昵称")
     public IJSONResult setNickname(@RequestBody UsersBO userBO) {
 
         // todo 对Nickname的判空
@@ -101,6 +107,7 @@ public class UserController {
     }
 
     @PostMapping("/search")
+    @ApiOperation("搜索用户")
     public IJSONResult searchUser(String myUserId, String friendUsername) {
 
         if (StringUtils.isBlank(myUserId)
@@ -120,6 +127,7 @@ public class UserController {
     }
 
     @PostMapping("/addFriendRequest")
+    @ApiOperation(value = "添加好友请求")
     public IJSONResult addFriendRequest(String myUserId, String friendUsername) {
         if (StringUtils.isBlank(myUserId)
                 || StringUtils.isBlank(friendUsername)) {
@@ -136,6 +144,7 @@ public class UserController {
     }
 
     @PostMapping("/queryFriendRequests")
+    @ApiOperation(value = "查询好友请求")
     public IJSONResult queryFriendRequests(String userId) {
         // 判空
         if (StringUtils.isBlank(userId)) {
@@ -146,6 +155,7 @@ public class UserController {
     }
 
     @PostMapping("/operFriendRequest")
+    @ApiOperation(value = "处理好友请求")
     public IJSONResult operFriendRequest(String acceptUserId, String sendUserId, Integer operType) {
         // 判空
         if (StringUtils.isBlank(acceptUserId)
@@ -171,6 +181,7 @@ public class UserController {
     }
 
     @PostMapping("/myFriends")
+    @ApiOperation(value = "查询我的朋友")
     public IJSONResult myFriends(String userId) {
         // 判空
         if (StringUtils.isBlank(userId)) {

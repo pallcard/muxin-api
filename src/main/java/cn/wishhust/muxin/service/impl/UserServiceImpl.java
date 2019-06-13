@@ -1,9 +1,12 @@
 package cn.wishhust.muxin.service.impl;
 
+import cn.wishhust.muxin.enums.MsgActionEnum;
 import cn.wishhust.muxin.enums.SearchFriendsStatusEnum;
 import cn.wishhust.muxin.enums.MsgSignFlagEnum;
 import cn.wishhust.muxin.mapper.*;
 import cn.wishhust.muxin.netty.ChatMsg;
+import cn.wishhust.muxin.netty.DataContent;
+import cn.wishhust.muxin.netty.UserChannelRel;
 import cn.wishhust.muxin.pojo.FriendsRequest;
 import cn.wishhust.muxin.pojo.MyFriends;
 import cn.wishhust.muxin.pojo.Users;
@@ -12,7 +15,10 @@ import cn.wishhust.muxin.pojo.vo.MyFriendsVO;
 import cn.wishhust.muxin.service.UserService;
 import cn.wishhust.muxin.utils.FastDFSClient;
 import cn.wishhust.muxin.utils.FileUtils;
+import cn.wishhust.muxin.utils.JsonUtils;
 import cn.wishhust.muxin.utils.QRCodeUtils;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -191,6 +197,13 @@ public class UserServiceImpl implements UserService {
         saveFriends(sendUserId, acceptUserId);
         saveFriends(acceptUserId, sendUserId);
         deleteFriendRequest(sendUserId, acceptUserId);
+        Channel sendChannel = UserChannelRel.get(sendUserId);
+        if (null != sendChannel) {
+            // 使用websocket主动推送消息到请求发起者，更新他的通讯录列表
+            DataContent dataContent = new DataContent();
+            dataContent.setAction(MsgActionEnum.PULL_FRIEND.type);
+            sendChannel.writeAndFlush(new TextWebSocketFrame(JsonUtils.objectToJson(dataContent)));
+        }
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

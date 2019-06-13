@@ -13,7 +13,6 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.commons.lang3.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
@@ -48,9 +47,12 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
             String senderId = chatMsg.getSenderId();
 
             // 消息保存到数据库
-            UserService userService = (UserService) SpringUtil.getBean("UserServiceImpl");
+            UserService userService = (UserService) SpringUtil.getBean("userServiceImpl");
             String msgId = userService.saveMsg(chatMsg);
             chatMsg.setMsgId(msgId);
+
+            DataContent dataContentMsg = new DataContent();
+            dataContentMsg.setChatMsg(chatMsg);
 
             Channel receiverChannel = UserChannelRel.get(receiverId);
             if (null == receiverChannel) {
@@ -61,14 +63,14 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
                 if (null != findChannel) {
                     receiverChannel.writeAndFlush(
                             new TextWebSocketFrame(
-                                    JsonUtils.objectToJson(chatMsg)));
+                                    JsonUtils.objectToJson(dataContentMsg)));
                 } else {
                     // todo 用户离线，推送消息
                 }
             }
         } else if (action == MsgActionEnum.SIGNED.type) {
             //  2.3 签收消息类型，针对具体的消息进行签收，修改数据库中对应消息的签收状态【已签收】
-            UserService userService = (UserService) SpringUtil.getBean("UserServiceImpl");
+            UserService userService = (UserService) SpringUtil.getBean("userServiceImpl");
             // 扩展字段在signed类型的消息中，代表需要去签收的消息id，逗号间隔
             String msgIdsStr = dataContent.getExtend();
             String[] msgIds = msgIdsStr.split(",");
