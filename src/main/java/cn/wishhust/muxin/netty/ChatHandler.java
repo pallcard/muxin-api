@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
-    private static ChannelGroup users =
+    public static ChannelGroup users =
             new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
@@ -88,7 +88,7 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 
         } else if (action == MsgActionEnum.KEEPALIVE.type) {
             //  2.4 心跳类型消息
-
+            System.out.println("收到来自channel为[" + currentChannel + "]的心跳包...");
         }
     }
 
@@ -108,6 +108,8 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        String channelId = ctx.channel().id().asShortText();
+        System.out.println("客户端被移除，channelId为："+channelId);
         // ChannelGroup自动移除对应的客户端channel
         users.remove(ctx.channel());
     }
